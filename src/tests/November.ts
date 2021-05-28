@@ -1,6 +1,5 @@
-import { ClientFunction, Selector } from 'testcafe'
+import { ClientFunction } from 'testcafe'
 import MailosaurClient from "mailosaur"
-const {"v4": uuidv4} = require('uuid')
 import Signup from '../utils/Signup'
 import Login from '../utils/Login'
 import SignupConfirmation from '../utils/SignupConfirmation'
@@ -8,13 +7,12 @@ import CompanyDetails from '../utils/CompanyDetails'
 
 const client = new MailosaurClient("rm3MH2V3L0qUmbrf")
 const mailosaurServerId = "7v01vuu9"
-const emailAddress = `${uuidv4()}@7v01vuu9.mailosaur.net`
+const emailAddress = "santhosh.vadivel@7v01vuu9.mailosaur.net"
 const customercvr = "25628470"
 let customerid:string
 
 fixture ('Signup page').page ('https://app-demo.novemberfirst.com/#/public/signup')
 .beforeEach(async () => await client.messages.deleteAll(mailosaurServerId))
-
 test('SIGNUP TESTS', async t => {
 
     await t
@@ -32,7 +30,10 @@ test('SIGNUP TESTS', async t => {
     .typeText(Signup.EmailConfirmInputField,emailAddress)
     .typeText(Signup.PhoneInputField,'8526144140')
     .click(Signup.Checkbox)
-    .click(Signup.CreateAccountButton)
+    .click(Signup.CreateAccountButton).takeScreenshot({
+        path: 'Screenshots/signuppage.png',
+        fullPage: true
+    })
 
     .expect(SignupConfirmation.ConfirmationHeader.textContent).eql(' Please confirm your email ')
     .expect(SignupConfirmation.ConfirmationMessage.textContent).eql(' Please click on the link in the email we have sent you to continue the sign-up. It may take up to 5 min. before you receive the e-mail. ')
@@ -45,12 +46,12 @@ test('SIGNUP TESTS', async t => {
 
     //extract the password reset link from the mail
     const PasswordResetLink = message.html.links[0].href
-    console.log("The password reset link is" +PasswordResetLink)
+    console.log("The password reset link is: " +PasswordResetLink)
 
     //verify password reset email
     await t.expect(message.subject).eql("Please verify your e-mail")
     await t.expect(message.to[0].email).eql(emailAddress)
-    console.log("The email address is" +emailAddress)
+    console.log("The email address is: " +emailAddress)
 
     //navigate to password rest link and reset the password
     await t
@@ -72,12 +73,27 @@ test('SIGNUP TESTS', async t => {
     })
 
     customerid = await CompanyDetails.customeridField.textContent
-    console.log("The customerid is" +customerid)
-
+    console.log("The customerid is: " +customerid)
 })//SIGNUP TESTS
 
 fixture ('Valid Signin Test').page ('https://app-demo.novemberfirst.com/#/public')
 test('Sign in Test with valid credentials', async t => {
+
+    await t
+    .resizeWindowToFitDevice('iPhone 6s',{
+        portraitOrientation: true
+    })
+    const getWindowInnerWidthiPhone = ClientFunction(() => window.innerWidth);
+    const innerWidthiPhone6s = await getWindowInnerWidthiPhone();
+    await t.expect(innerWidthiPhone6s).eql(375)//default width for iPhone
+
+    await t
+    .resizeWindowToFitDevice('iPad Pro 9.7',{
+        portraitOrientation: true
+    })
+    const getWindowInnerWidthiPad = ClientFunction(() => window.innerWidth);
+    const innerWidthiPad = await getWindowInnerWidthiPad();
+    await t.expect(innerWidthiPad).eql(768) //default width for iPad Pro 9.7
 
     await t
     .click(Signup.LanguageDropdown)
@@ -87,6 +103,7 @@ test('Sign in Test with valid credentials', async t => {
     .expect(Login.SignupLink.exists).ok()
     .expect(Login.ForgotPasswordLink.exists).ok()
 
+    await t
     //Login with valid credentials created above
     .typeText(Login.CustomerNumberInputField,customerid)
     .typeText(Login.EmailInputField,emailAddress)
@@ -98,15 +115,8 @@ test('Sign in Test with valid credentials', async t => {
 
     // verify the URL redirects to 'company-details' post login
     const getLocation = ClientFunction(() => document.location.href)
-    await t
-    .expect(getLocation()).contains('onboarding/company-details')
-
-    .resizeWindowToFitDevice('iPhone 6s',{
-        portraitOrientation: true
-    })
-
-
-})//Sign in test
+    await t .expect(getLocation()).contains('onboarding/company-details')
+})//Valid Signin test
 
 fixture ('Invalid Signin Test').page ('https://app-demo.novemberfirst.com/#/public')
 test('Sign in Test with invalid credentials', async t => {
@@ -133,7 +143,8 @@ test('Sign in Test with invalid credentials', async t => {
         path: 'Screenshots/invalidloginpage.png',
         fullPage: true
     })
-    
+
+    // verify of the alert has forgot-password href in it
     const hrefattr = await Login.ResetPasswordLink.getAttribute('href')
     await t.expect(hrefattr).eql('/#/public/forgot-password')
-})//Sign in test
+})//Invalid Signin test

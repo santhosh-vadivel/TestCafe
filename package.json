@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "testcafe chrome src/tests/secondTest.ts --reporter html:Reports/secondTests.html"
+    "test": "testcafe chrome src/tests/November.ts --reporter html:Reports/secondTests.html"
   },
   "author": "santhosh",
   "license": "ISC",
