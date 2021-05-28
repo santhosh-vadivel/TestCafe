@@ -1,0 +1,21 @@
+{
+  "name": "testcafe-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "testcafe chrome src/tests/secondTest.ts --reporter html:Reports/secondTests.html"
+  },
+  "author": "santhosh",
+  "license": "ISC",
+  "dependencies": {
+    "@types/uuid": "^8.3.0",
+    "mailosaur": "^7.3.1",
+    "testcafe-reporter-html": "^1.4.6",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "testcafe": "^1.14.2",
+    "typescript": "^4.2.4"
+  }
+}
